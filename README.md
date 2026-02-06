@@ -1,6 +1,6 @@
 # Spotify-Backup
 
-An archival service that performs snapshots of a Spotify library. It captures exhaustive metadata, including ISRC fingerprints and added_at timestamps, ensuring your library can be reconstructed or migrated even if Spotify suddenly ceased to exist or deleted your account—all in one JSON file.
+An archival service that performs snapshots of your entire Spotify library. It captures verbose metadata, including ISRC fingerprints and added_at timestamps, ensuring your library can be reconstructed even if Spotify suddenly ceases to exist or you lose access to your account--all in one JSON file.
 
 ## Metadata Captured
 
