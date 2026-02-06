@@ -1,0 +1,13 @@
+services:
+  spotify-backup:
+    build: .
+    container_name: spotify_backup
+    volumes:
+      - ./backups:/data  # Maps a local folder to store the JSONs
+    environment:
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+      - DISCORD_WEBHOOK=${DISCORD_WEBHOOK}
+      - TEST_MODE=$(TEST_MODE)
+    # Keep container alive only while script runs
+    command: python /app/src/backup.py
