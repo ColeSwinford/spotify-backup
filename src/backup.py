@@ -41,7 +41,7 @@ def get_all_items(sp, results):
         return items 
     # <--- END TEST MODE LOGIC --->
 
-    # Track count
+    # Track count for progress logging
     count = len(items)
 
     while results['next']:
@@ -97,23 +97,31 @@ def main():
         }
 
         # 1. Fetch Liked Songs
-        results = sp.current_user_saved_tracks(limit=50) # In test mode, get_all_items stops after this
+        print(f"Fetching Liked Songs...", flush=True)
+        results = sp.current_user_saved_tracks(limit=50)
         tracks = get_all_items(sp, results)
         
         for item in tracks:
             track = item['track']
-            data['liked_songs'].append({
-                "name": track['name'],
-                "artist": ", ".join([artist['name'] for artist in track['artists']]),
-                "uri": track['uri']
-            })
+            if track:
+                data['liked_songs'].append({
+                    "name": track['name'],
+                    "artist": ", ".join([artist['name'] for artist in track['artists']]),
+                    "album": track['album']['name'],
+                    "release_date": track['album']['release_date'],
+                    "isrc": track['external_ids'].get('isrc', ''),
+                    "uri": track['uri'],
+                    "added_at": item['added_at']
+                })
             
         # 2. Fetch Playlists
+        print(f"Fetching Playlists...", flush=True)
         playlists_results = sp.current_user_playlists(limit=50)
         all_playlists = get_all_items(sp, playlists_results)
         
         playlist_count = 0
         for pl in all_playlists:
+            # Skip Spotify owned playlists (algorithm ones usually fail or are dynamic)
             if pl['owner']['id'] == 'spotify': continue
             
             # <--- TEST MODE BREAK --->
@@ -123,6 +131,8 @@ def main():
             # <--- END TEST MODE BREAK --->
             
             playlist_count += 1
+            print(f"   Processing Playlist: {pl['name']}", flush=True)
+            
             pl_tracks_results = sp.playlist_items(pl['id'], limit=100)
             pl_tracks = get_all_items(sp, pl_tracks_results)
             
@@ -133,9 +143,12 @@ def main():
             }
             for item in pl_tracks:
                 if item['track']:
+                    track = item['track']
                     p_data['tracks'].append({
-                        "name": item['track'].get('name', 'Unknown'),
-                        "uri": item['track'].get('uri', '')
+                        "name": track.get('name', 'Unknown'),
+                        "artist": ", ".join([artist['name'] for artist in track.get('artists', [])]),
+                        "isrc": track.get('external_ids', {}).get('isrc', ''),
+                        "uri": track.get('uri', '')
                     })
             data['playlists'].append(p_data)
 
@@ -148,7 +161,6 @@ def main():
         elapsed = round(time.time() - start_time, 2)
         song_count = len(data['liked_songs'])
         
-        # Add [TEST] tag to discord message if testing
         title = "**Spotify TEST Backup Successful**" if IS_TEST_MODE else "**Spotify Backup Successful**"
         
         msg = (f"{title} ✅\n"
