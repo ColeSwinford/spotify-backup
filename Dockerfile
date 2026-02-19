@@ -10,4 +10,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Default command (can be overridden by docker-compose)
-CMD ["python", "src/backup.py"]
+CMD ["python", "src/spotify-backup.py"]

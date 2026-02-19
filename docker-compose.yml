@@ -10,4 +10,4 @@ services:
       - DISCORD_WEBHOOK=${DISCORD_WEBHOOK}
       - TEST_MODE=$(TEST_MODE)
     # Keep container alive only while script runs
-    command: python /app/src/backup.py
+    command: python /app/src/spotify-backup.py
