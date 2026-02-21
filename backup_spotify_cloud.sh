@@ -23,8 +23,10 @@ DEST_REMOTE="gdrive:Server Backups/Spotify-Backups"
 LOG_FILE="$PROJECT_DIR/rclone_log.txt"
 
 # Retention
-CLOUD_RETENTION="2y"
-LOCAL_RETENTION="60"
+# Linux 'find' command only accepts integers for days, and rclone assume days
+LOCAL_RETENTION="30"
+# Rclone suffix for Months
+CLOUD_RETENTION="6M"
 
 # ==========================================
 # FUNCTIONS
