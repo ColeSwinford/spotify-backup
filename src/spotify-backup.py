@@ -123,7 +123,7 @@ def main():
         print(msg)
 
     except Exception as e:
-        send_discord_msg(f"**Spotify Vault Backup FAILED** ❌\n🚨 Error: `{str(e)}`")
+        send_discord_msg(f"@everyone 🚨 **Spotify Vault Backup FAILED** ❌\n🚨 Error: `{str(e)}`")
         raise e
 
 if __name__ == "__main__":
