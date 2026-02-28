@@ -4,13 +4,41 @@ An archival service that performs snapshots of your entire Spotify library. It c
 
 ## Metadata Captured
 
-To ensure future-proof backups, the service archives more than just song titles:
+To ensure future-proof backups, the service archives more than just song titles. It extracts the following schema for every track:
+
+```text
+name: string
+artist: string
+album: string
+release_date: string
+isrc: string
+uri: string
+added_at: string
+duration_ms: integer
+explicit: boolean
+```
 
 - ISRC: The global unique identifier for the specific recording.
 - Release Date: To distinguish between original pressings and remasters.
 - Added At: Precise timestamp of when the track was saved.
 - Album/Artist: Full string metadata for secondary matching.
 - Spotify URI: The direct platform-specific link.
+
+Example Output:
+
+```json
+{
+    "name": "Instant Crush (feat. Julian Casablancas)",
+    "artist": "Daft Punk, Julian Casablancas",
+    "album": "Random Access Memories",
+    "release_date": "2013-05-20",
+    "isrc": "USQX91300105",
+    "uri": "spotify:track:2cGxRwrMyEAp8dEbuZaVv6",
+    "added_at": "2019-03-31T19:55:11Z",
+    "duration_ms": 337560,
+    "explicit": false
+}
+```
 
 ## Technical Specifications
 
