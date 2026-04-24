@@ -10,7 +10,7 @@ import requests
 CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 REDIRECT_URI = "http://127.0.0.1:5173/"
-SCOPE = "user-library-read playlist-read-private"
+SCOPE = "user-library-read playlist-read-private playlist-read-collaborative"
 BACKUP_DIR = "/data"
 DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 IS_TEST_MODE = os.getenv("TEST_MODE", "false").lower() == "true"
@@ -34,14 +34,16 @@ def get_all_items(sp, results):
     while results["next"]:
         results = sp.next(results)
         items.extend(results["items"])
-        # 100ms sleep prevents 429 Rate Limit hits on large libraries
-        time.sleep(0.1)
+        # 0.5s sleep prevents 429 Rate Limit hits on large libraries
+        time.sleep(0.5)
     return items
 
 
 def extract_track_metadata(item):
     """Standardizes high-fidelity metadata extraction for both likes and playlists."""
-    track = item.get("track")
+    # February 2026 Fix: Playlists now use 'item', Liked Songs still use 'track'
+    track = item.get("track") or item.get("item")
+
     if not track:
         return None
 
@@ -72,7 +74,9 @@ def main():
                 scope=SCOPE,
                 open_browser=False,
                 cache_path="/data/.cache",
-            )
+            ),
+            requests_timeout=20,
+            retries=5,
         )
 
         data = {
@@ -80,6 +84,11 @@ def main():
             "liked_songs": [],
             "playlists": [],
         }
+
+        # Identify Current User for Strict Ownership Check
+        current_user = sp.current_user()
+        my_user_id = current_user["id"]
+        print(f"Logged in as: {my_user_id}", flush=True)
 
         # 1. Fetch Liked Songs (Hard cap 50 per request)
         print("Fetching Liked Songs...", flush=True)
@@ -95,9 +104,15 @@ def main():
         all_playlists = get_all_items(sp, playlists_results)
 
         playlist_count = 0
+        skipped_playlists = 0
+
         for pl in all_playlists:
-            if pl["owner"]["id"] == "spotify":
+            # Strict Ownership Check: Skip if you do not own it
+            if pl["owner"]["id"] != my_user_id:
+                print(f"   [SKIPPED] Not Owner: '{pl['name']}'", flush=True)
+                skipped_playlists += 1
                 continue
+
             if IS_TEST_MODE and playlist_count >= 2:
                 break
 
@@ -105,8 +120,14 @@ def main():
             print(f"   Vaulting Playlist: {pl['name']}", flush=True)
 
             # Limit 100 is allowed for playlist items
-            pl_tracks_results = sp.playlist_items(pl["id"], limit=100)
-            pl_tracks = get_all_items(sp, pl_tracks_results)
+            try:
+                pl_tracks_results = sp.playlist_items(pl["id"], limit=100)
+                pl_tracks = get_all_items(sp, pl_tracks_results)
+            except spotipy.exceptions.SpotifyException as e:
+                # Catch 403s or any other API hiccups
+                print(f"   [ERROR] Failed to fetch '{pl['name']}': {e}", flush=True)
+                skipped_playlists += 1
+                continue
 
             p_data = {
                 "name": pl["name"],
@@ -118,24 +139,31 @@ def main():
             }
             data["playlists"].append(p_data)
 
+            # Cooldown between playlists to respect API limits
+            time.sleep(1.0)
+
         # 3. Save to JSON
         filename = f"{BACKUP_DIR}/spotify_backup_{run_timestamp}.json"
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
 
+        # 4. Final Logging and Notification
         elapsed = round(time.time() - start_time, 2)
         msg = (
             f"**Spotify Vault Backup Successful** ✅\n"
             f"📅 Date: {run_timestamp}\n"
             f"🎵 Liked Songs: {len(data['liked_songs'])}\n"
-            f"📂 Playlists: {playlist_count}\n"
+            f"📂 Playlists Vaulted: {len(data['playlists'])}\n"
+            f"⚠️ Playlists Skipped: {skipped_playlists}\n"
             f"⏱️ Time: {elapsed}s"
         )
         send_discord_msg(msg)
         print(msg)
 
     except Exception as e:
-        send_discord_msg(f"**Spotify Vault Backup FAILED** ❌\n🚨 Error: `{str(e)}`")
+        send_discord_msg(
+            f"@everyone **Spotify Vault Backup FAILED** ❌\n🚨 Error: `{str(e)}`"
+        )
         raise e
 
 

@@ -79,7 +79,7 @@ DISCORD_WEBHOOK=your_webhook_here
 ### Updating Logic
 
 If you modify the Python code, rebuild the container:
-`docker compose build`
+`docker compose build --no-cache`
 
 ### Automation (Optional)
 
