@@ -89,6 +89,14 @@ To truly "set and forget," you can automate the backup using a system cron job. 
 
 2. Add the following line: `0 4 1 * * cd /path/to/project && /usr/bin/docker compose run --rm spotify-backup >/dev/null 2>&1`
 
+### Token Rotation (6-Month Re-Auth)
+
+Spotify enforces a strict 6-month hard expiration on all OAuth refresh tokens.
+
+1. Clear stale token cache: `rm -f backups/.cache`
+
+2. Run container interactively and follow authorization instructions: `docker compose run -it --rm spotify-backup`
+
 ## Disclaimer
 
 This project is a third-party tool and is not affiliated, associated, authorized, endorsed by, or in any way officially connected with Spotify.

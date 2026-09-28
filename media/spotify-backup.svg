@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Spotify Green Background Circle -->
+  <circle cx="256" cy="256" r="230" fill="#1ED760" />
+
+  <!-- Hard Drive Body Silhouette -->
+  <g fill="#000000">
+    <!-- Top Chassis (Trapezoid with smooth rounded corners) -->
+    <path d="M 196 136 
+             H 316 
+             A 20 20 0 0 1 335 148 
+             L 361 298 
+             A 14 14 0 0 1 347 312 
+             H 165 
+             A 14 14 0 0 1 151 298 
+             L 177 148 
+             A 20 20 0 0 1 196 136 Z" />
+
+    <!-- Bottom Base Tray (Capsule / Pill Shape) -->
+    <rect x="130" y="316" width="252" height="68" rx="34" />
+  </g>
+
+  <!-- Green Vector Accent Lines -->
+  <g fill="none" stroke="#1ED760" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Download Arrow Outline -->
+    <path d="M 238 158 H 274 V 220 H 310 L 256 274 L 202 220 H 238 Z" stroke-width="11" />
+
+    <!-- Drive LED Circle -->
+    <circle cx="178" cy="350" r="13" stroke-width="8" />
+
+    <!-- Drive Slot -->
+    <rect x="212" y="344" width="130" height="12" rx="6" stroke-width="8" />
+  </g>
+</svg>
