@@ -70,32 +70,55 @@ DISCORD_WEBHOOK=your_webhook_here
 
 #### Standard Run
 
-`docker compose run --rm spotify-backup`
+```bash
+docker compose run --rm spotify-backup
+```
 
 #### Test Mode (Skips full download)
 
-`docker compose run -e TEST_MODE=true --rm spotify-backup`
+```bash
+docker compose run -e TEST_MODE=true --rm spotify-backup
+```
 
 ### Updating Logic
 
 If you modify the Python code, rebuild the container:
-`docker compose build --no-cache`
+
+```bash
+docker compose build --no-cache
+```
 
 ### Automation (Optional)
 
 To truly "set and forget," you can automate the backup using a system cron job. For example, to run the backup on the 1st of every month at 4:00 AM:
 
-1. Open crontab: `crontab -e`
+1. Open crontab:
 
-2. Add the following line: `0 4 1 * * cd /path/to/project && /usr/bin/docker compose run --rm spotify-backup >/dev/null 2>&1`
+    ```bash
+    crontab -e
+    ```
+
+2. Add the following line:
+
+    ```bash
+    0 4 1 * * cd /path/to/project && /usr/bin/docker compose run --rm spotify-backup >/dev/null 2>&1
+    ```
 
 ### Token Rotation (6-Month Re-Auth)
 
 Spotify enforces a strict 6-month hard expiration on all OAuth refresh tokens.
 
-1. Clear stale token cache: `rm -f backups/.cache`
+1. Clear stale token cache
 
-2. Run container interactively and follow authorization instructions: `docker compose run -it --rm spotify-backup`
+    ```bash
+    rm -f backups/.cache
+    ```
+
+2. Run container interactively and follow authorization instructions
+
+    ```bash
+    docker compose run -it --rm spotify-backup
+    ```
 
 ## Disclaimer
 
